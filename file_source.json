@@ -1,0 +1,6 @@
+{"file_lookup_key": "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/file_list.txt",
+    "articles": [
+        "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/articles.txt.0-9A-B.tar.gz",
+        "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/articles.txt.C-H.tar.gz",
+        "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/articles.txt.I-N.tar.gz",
+        "ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/articles.txt.O-Z.tar.gz"]}
