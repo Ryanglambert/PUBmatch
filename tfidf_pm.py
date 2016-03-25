@@ -18,15 +18,27 @@ def load_articles():
         genre_folder_path = os.path.join(DATA_PATH, genre_folder)
         genre_file_list = os.listdir(genre_folder_path)
         for article_file_title in genre_file_list:
-            ARTICLE_FILE_TITLES.append(article_file_title)
             article_file_path = os.path.join(genre_folder_path, article_file_title)
-            ARTICLE_FILE_PATHS.append(article_file_path)
-            with open(article_file_path, 'rb') as f:
-                document = f.read()
-                ARTICLE_DOCUMENT_LIST.append(document)
+            if os.path.isfile(article_file_path):
+                ARTICLE_FILE_TITLES.append(article_file_title)
+                ARTICLE_FILE_PATHS.append(article_file_path)
+                with open(article_file_path, 'rb') as f:
+                    document = f.read()
+                    ARTICLE_DOCUMENT_LIST.append(document)
 
-            print "done with: ", article_file_title
-            print "progress: ", completed_genre_folders / float(genre_folders_left)
+                print "done with: ", article_file_title
+                print "progress: ", completed_genre_folders / float(genre_folders_left)
+            else:
+                sub_article_folder_list = os.listdir(article_file_path)
+                for sub_article_file_title in sub_article_folder_list:
+                    sub_article_file_path = os.path.join(article_file_path, 
+                            sub_article_file_title)
+                    ARTICLE_FILE_TITLES.append(sub_article_file_title)
+                    ARTICLE_FILE_PATHS.append(sub_article_file_path)
+                    with open(sub_article_file_path, 'rb') as f:
+                        document = f.read()
+                        ARTICLE_DOCUMENT_LIST.append(document)
+
 
 
 def pickle_progress(progress_object, filename):
