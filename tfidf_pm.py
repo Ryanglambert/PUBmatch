@@ -1,11 +1,8 @@
 import pdb
 import os
 import pickle
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from gensim import corpora, models, similarities, matutils
-
-#from nltk import PorterStemmer
-from nltk.corpus import stopwords
 
 DATA_PATH = ('./pmc_data/pmc_text_files/')
 GENRE_FOLDERS = os.listdir(DATA_PATH)
@@ -13,9 +10,11 @@ ARTICLE_FILE_PATHS = []
 ARTICLE_FILE_TITLES = []
 ARTICLE_DOCUMENT_LIST = []
 
-
 def load_articles():
+    genre_folders_left = len(GENRE_FOLDERS)
+    completed_genre_folders = 0
     for genre_folder in GENRE_FOLDERS:
+        completed_genre_folders += 1
         genre_folder_path = os.path.join(DATA_PATH, genre_folder)
         genre_file_list = os.listdir(genre_folder_path)
         for article_file_title in genre_file_list:
@@ -26,23 +25,45 @@ def load_articles():
                 document = f.read()
                 ARTICLE_DOCUMENT_LIST.append(document)
 
+            print "done with: ", article_file_title
+            print "progress: ", completed_genre_folders / float(genre_folders_left)
+
+
+def pickle_progress(progress_object, filename):
+    print "{}, SUCCEEDS \n ########################".format(filename)
+    with open(filename + ".pkl", 'w') as f:
+        pickle.dump(progress_object, f)
+
+
 
 load_articles()
 
-# print "ARTICLE_DOCUMENT_LIST length: ", len(ARTICLE_DOCUMENT_LIST)
-# print "ARTICLE_FILE_TITLES length: ", len(ARTICLE_FILE_TITLES)
 
-#### TODO: load text into TFIDF with sklearn
-STOP_WORDS = stopwords.words('english')
+### CountVectorize ###
+count_vectorizer = CountVectorizer(stop_words='english')
+pickle_progress(count_vectorizer, 'count_vectorizer')
+count_vectorizer.fit(ARTICLE_DOCUMENT_LIST)
+pubmed_vecs = count_vectorizer.transform(ARTICLE_DOCUMENT_LIST).transpose()
+pickle_progress(pubmed_vecs, 'pubmed_vecs')
+id2word = dict((v, k) for k, v in count_vectorizer.vocabulary_.iteritems())
+pubmed_corpus = matutils.Sparse2Corpus(pubmed_vecs)
 
-vectorizer = TfidfVectorizer(stop_words=STOP_WORDS)
 
-pubmed_vectors = vectorizer.fit_transform(ARTICLE_DOCUMENT_LIST)
+### TFIDF ###
+pubmed_tfidf = models.TfidfModel(pubmed_corpus)
+pickle_progress(pubmed_tfidf, 'pubmed_tfidf')
+pubmed_tfidf_corpus = pubmed_tfidf[pubmed_corpus]
+pickle_progress(pubmed_tfidf_corpus, 'pubmed_tfidf_corpus')
 
-with open('pubmed_tfidf.pkl', 'w') as f:
-    pickle.dump(pubmed_vectors, f)
 
-print ARTICLE_DOCUMENT_LIST[0], ['\n'] * 10
-print ARTICLE_DOCUMENT_LIST[3]
+### SVD ###
+lsi = models.LsiModel(pubmed_corpus, id2word=id2word, num_topics=200)
+pubmed_lsi_corpus = lsi[pubmed_tfidf_corpus]
+pickle_progress(pubmed_lsi_corpus, 'pubmed_lsi_corpus')
+
+
+
+
+
 
 
