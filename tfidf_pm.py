@@ -53,7 +53,6 @@ load_articles()
 
 ### CountVectorize ###
 count_vectorizer = CountVectorizer(stop_words='english')
-pickle_progress(count_vectorizer, 'count_vectorizer')
 count_vectorizer.fit(ARTICLE_DOCUMENT_LIST)
 pubmed_vecs = count_vectorizer.transform(ARTICLE_DOCUMENT_LIST).transpose()
 pickle_progress(pubmed_vecs, 'pubmed_vecs')
