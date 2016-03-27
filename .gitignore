@@ -1,2 +1,3 @@
 pmc_data/
+pmc_models_serialized/
 *.pkl
