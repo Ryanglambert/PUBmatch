@@ -4,16 +4,13 @@ import pickle
 from gensim import corpora, models, similarities, matutils, interfaces, utils
 from nltk.corpus import stopwords
 import numpy as np
+import sys
 
 STOP_WORDS = stopwords.words('english')
 
 
 DATA_PATH = (u'./pmc_data/pmc_text_files/')
 SAVE_LOCATION = './pmc_models_serialized/'
-GENRE_FOLDERS = os.listdir(DATA_PATH)
-ARTICLE_FILE_PATHS = []
-ARTICLE_FILE_TITLES = []
-ARTICLE_DOCUMENT_LIST = []
 
 class PubmedCorpus(object):
     def __init__(self, data_folder=DATA_PATH):
@@ -44,6 +41,18 @@ class PubmedCorpus(object):
                     doc_tokenized = [i for i in doc_token_gen]
                     self.dictionary.add_documents([doc_tokenized])
 
+def is_dist_or_not():
+    dist_input = ''
+    try:
+        dist_input = sys.argv[1]
+    except IndexError:
+        pass
+    if dist_input == 'distributed':
+        dist_or_not = True
+    else:
+        dist_or_not = False
+    return dist_or_not
+
 
 def to_unicode_or_bust(
         obj, encoding='utf-8'):
@@ -64,11 +73,9 @@ pubmed_lsi = models.LsiModel(pubmed_corpus_tfidf,
                              id2word=pubmed_corpus.dictionary, 
                              num_topics=300,
                              chunksize=10000,
-                             distributed=True)
+                             distributed=is_dist_or_not())
 
 pubmed_corpus_lsi = pubmed_lsi[pubmed_corpus_tfidf]
 pubmed_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_lsi'))
-
-pubmed_lsi.print_topics(2)
 
 print("######### DONE!!!! ##########")
