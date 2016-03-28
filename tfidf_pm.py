@@ -1,80 +1,72 @@
-import pdb
+import pdb 
 import os
 import pickle
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-from gensim import corpora, models, similarities, matutils
+from gensim import corpora, models, similarities, matutils, interfaces, utils
+from nltk import word_tokenize, RegexpTokenizer
+from nltk.corpus import stopwords
+import numpy as np
 
-DATA_PATH = ('./pmc_data/pmc_text_files/')
+STOP_WORDS = stopwords.words('english')
+
+
+DATA_PATH = (u'./pmc_data/pmc_text_files/')
+SAVE_LOCATION = './pmc_models_serialized/'
 GENRE_FOLDERS = os.listdir(DATA_PATH)
 ARTICLE_FILE_PATHS = []
 ARTICLE_FILE_TITLES = []
 ARTICLE_DOCUMENT_LIST = []
 
-def load_articles():
-    genre_folders_left = len(GENRE_FOLDERS)
-    completed_genre_folders = 0
-    for genre_folder in GENRE_FOLDERS:
-        completed_genre_folders += 1
-        genre_folder_path = os.path.join(DATA_PATH, genre_folder)
-        genre_file_list = os.listdir(genre_folder_path)
-        for article_file_title in genre_file_list:
-            article_file_path = os.path.join(genre_folder_path, article_file_title)
-            if os.path.isfile(article_file_path):
-                ARTICLE_FILE_TITLES.append(article_file_title)
-                ARTICLE_FILE_PATHS.append(article_file_path)
-                with open(article_file_path, 'rb') as f:
-                    document = f.read()
-                    ARTICLE_DOCUMENT_LIST.append(document)
-
-                print "done with: ", article_file_title
-                print "progress: ", completed_genre_folders / float(genre_folders_left)
-            else:
-                sub_article_folder_list = os.listdir(article_file_path)
-                for sub_article_file_title in sub_article_folder_list:
-                    sub_article_file_path = os.path.join(article_file_path, 
-                            sub_article_file_title)
-                    ARTICLE_FILE_TITLES.append(sub_article_file_title)
-                    ARTICLE_FILE_PATHS.append(sub_article_file_path)
-                    with open(sub_article_file_path, 'rb') as f:
-                        document = f.read()
-                        ARTICLE_DOCUMENT_LIST.append(document)
-
+class PubmedCorpus(object):
+    def __init__(self, data_folder=DATA_PATH):
+        self.data_folder = data_folder
+        self.dictionary = corpora.Dictionary()
+        self.load_corpus()
+        
+    def __iter__(self):
+        for root, dirs, files in os.walk(self.data_folder):
+            for file_name in files:
+                file_path = os.path.join(root, file_name)
+                with open(file_path, 'rb') as f:
+                    doc = f.read()
+                    doc_token_gen = utils.tokenize(doc, 
+                                                  lowercase=True)
+                    doc_tokenized = [i for i in doc_token_gen]
+                    yield self.dictionary.doc2bow(doc_tokenized)
+### TODO clean up redundancy    
+    def load_corpus(self):
+        for root, dirs, files in os.walk(self.data_folder):
+            for file_name in files:
+                file_path = os.path.join(root, file_name)
+                with open(file_path, 'rb') as f:
+                    doc = f.read()
+                    doc_token_gen = utils.tokenize(doc, 
+                                                  lowercase=True)
+                    doc_tokenized = [i for i in doc_token_gen]
+                    self.dictionary.add_documents([doc_tokenized])
 
 
-def pickle_progress(progress_object, filename):
-    print "{}, SUCCEEDS \n ########################".format(filename)
-    with open(filename + ".pkl", 'w') as f:
-        pickle.dump(progress_object, f)
+def to_unicode_or_bust(
+        obj, encoding='utf-8'):
+    if isinstance(obj, basestring):
+        if not isinstance(obj, unicode):
+            obj = unicode(obj, encoding)
+    return obj
+              
+pubmed_corpus = PubmedCorpus()
 
+pubmed_tfidf = models.TfidfModel(pubmed_corpus, normalize=True)
+pubmed_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_tfidf'))
 
+pubmed_corpus_tfidf = pubmed_tfidf[pubmed_corpus]
+pubmed_corpus_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus_tfidf'))
 
-load_articles()
+pubmed_lsi = models.LsiModel(pubmed_corpus_tfidf, 
+                             id2word=pubmed_corpus.dictionary, 
+                             num_topics=300)
 
+pubmed_corpus_lsi = pubmed_lsi[pubmed_corpus_tfidf]
+pubmed_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_lsi'))
 
-### CountVectorize ###
-count_vectorizer = CountVectorizer(stop_words='english')
-count_vectorizer.fit(ARTICLE_DOCUMENT_LIST)
-pubmed_vecs = count_vectorizer.transform(ARTICLE_DOCUMENT_LIST).transpose()
-pickle_progress(pubmed_vecs, 'pubmed_vecs')
-id2word = dict((v, k) for k, v in count_vectorizer.vocabulary_.iteritems())
-pubmed_corpus = matutils.Sparse2Corpus(pubmed_vecs)
+pubmed_lsi.print_topics(2)
 
-
-### TFIDF ###
-pubmed_tfidf = models.TfidfModel(pubmed_corpus)
-pickle_progress(pubmed_tfidf, 'pubmed_tfidf')
-pubmed_tfidf_corpus = pubmed_tfidf[pubmed_corpus]
-pickle_progress(pubmed_tfidf_corpus, 'pubmed_tfidf_corpus')
-
-
-### SVD ###
-lsi = models.LsiModel(pubmed_corpus, id2word=id2word, num_topics=200)
-pubmed_lsi_corpus = lsi[pubmed_tfidf_corpus]
-pickle_progress(pubmed_lsi_corpus, 'pubmed_lsi_corpus')
-
-
-
-
-
-
-
+print("######### DONE!!!! ##########")
