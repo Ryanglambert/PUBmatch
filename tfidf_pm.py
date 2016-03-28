@@ -31,6 +31,7 @@ class PubmedCorpus(object):
                                                   lowercase=True)
                     doc_tokenized = [i for i in doc_token_gen]
                     yield self.dictionary.doc2bow(doc_tokenized)
+
 ### TODO clean up redundancy    
     def load_corpus(self):
         for root, dirs, files in os.walk(self.data_folder):
