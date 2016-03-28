@@ -2,7 +2,6 @@ import pdb
 import os
 import pickle
 from gensim import corpora, models, similarities, matutils, interfaces, utils
-from nltk import word_tokenize, RegexpTokenizer
 from nltk.corpus import stopwords
 import numpy as np
 
