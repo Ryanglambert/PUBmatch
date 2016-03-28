@@ -62,7 +62,9 @@ pubmed_corpus_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus_tfidf'))
 
 pubmed_lsi = models.LsiModel(pubmed_corpus_tfidf, 
                              id2word=pubmed_corpus.dictionary, 
-                             num_topics=300)
+                             num_topics=300,
+                             chunksize=10000,
+                             distributed=True)
 
 pubmed_corpus_lsi = pubmed_lsi[pubmed_corpus_tfidf]
 pubmed_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_lsi'))
