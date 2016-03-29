@@ -13,11 +13,6 @@ pool_size = multiprocessing.cpu_count() - 3
 STOP_WORDS = stopwords.words('english')
 DATA_PATH = (u'./pmc_data/pmc_text_files/')
 SAVE_LOCATION = './pmc_models_serialized/'
-open_times = []
-read_times = []
-tokenize_times = []
-doc2bow_times = []
-add_docs_times = []
 
 class PubmedCorpus(object):
     def __init__(self, data_folder=DATA_PATH):
