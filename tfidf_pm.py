@@ -37,7 +37,7 @@ class PubmedCorpus(object):
         pool = multiprocessing.Pool(pool_size)
         for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=100 , maxsize=2):
             results = pool.imap(tokenized_from_file, file_chunk)
-            self.dictionary.add_documents(results)
+            self.dictionary.add_documents(results, prune_at=100000)
         pool.terminate()            
 
     def file_path_iter(self):
