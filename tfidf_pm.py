@@ -76,6 +76,7 @@ def to_unicode_or_bust(
               
 pubmed_corpus = PubmedCorpus()
 pubmed_corpus.load_corpus()
+pubmed_corpus.dictionary.save('pubmed_corpus.dict')
 
 pubmed_tfidf = models.TfidfModel(pubmed_corpus, normalize=True)
 pubmed_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_tfidf'))
