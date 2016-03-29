@@ -73,9 +73,15 @@ def to_unicode_or_bust(
               
 def main():
     pubmed_corpus = PubmedCorpus()
+    
+    print "################ BUILDING CORPUS ###############"
+
     pubmed_corpus.load_corpus()
     pubmed_corpus.dictionary.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus.dict'))
+    with open(os.path.join(SAVE_LOCATION, 'document_file_names'), 'w') as f:
+        pickle.dump(pubmed_corpus.document_file_names, f)
     
+    print "################ BUILDING TFIDF ###############"
     pubmed_tfidf = models.TfidfModel(pubmed_corpus, normalize=True)
     pubmed_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_tfidf'))
     
