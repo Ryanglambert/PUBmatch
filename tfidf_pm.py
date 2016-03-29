@@ -9,7 +9,7 @@ import multiprocessing
 import logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-pool_size = multiprocessing.cpu_count() - 3
+pool_size = max(1, multiprocessing.cpu_count() - 3)
 STOP_WORDS = stopwords.words('english')
 DATA_PATH = (u'./pmc_data/pmc_text_files/')
 SAVE_LOCATION = './pmc_models_serialized/'
