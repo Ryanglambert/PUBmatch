@@ -39,6 +39,7 @@ class PubmedCorpus(object):
         for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000 , maxsize=20):
             results = pool.imap(tokenized_from_file, file_chunk)
             self.dictionary.add_documents(results, prune_at=300000)
+            self.document_file_names += [file_path for file_path in file_chunk]
         pool.terminate()            
 
     def file_path_iter(self):
