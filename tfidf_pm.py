@@ -6,8 +6,10 @@ from nltk.corpus import stopwords
 import numpy as np
 import sys
 import multiprocessing
+import logging
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-pool_size = multiprocessing.cpu_count() - 1
+pool_size = multiprocessing.cpu_count() - 3
 STOP_WORDS = stopwords.words('english')
 DATA_PATH = (u'./pmc_data/pmc_text_files/')
 SAVE_LOCATION = './pmc_models_serialized/'
@@ -25,7 +27,7 @@ class PubmedCorpus(object):
         
     def __iter__(self):
         pool = multiprocessing.Pool(pool_size)        
-        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000, maxsize=2):
+        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000, maxsize=20):
             docs = pool.imap(tokenized_from_file, file_chunk)
             for doc_tokenized in docs:
                 yield self.dictionary.doc2bow(doc_tokenized)
@@ -35,9 +37,9 @@ class PubmedCorpus(object):
 
     def load_corpus(self):
         pool = multiprocessing.Pool(pool_size)
-        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000 , maxsize=2):
+        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000 , maxsize=20):
             results = pool.imap(tokenized_from_file, file_chunk)
-            self.dictionary.add_documents(results, prune_at=100000)
+            self.dictionary.add_documents(results, prune_at=300000)
         pool.terminate()            
 
     def file_path_iter(self):
@@ -80,12 +82,14 @@ pubmed_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_tfidf'))
 
 pubmed_corpus_tfidf = pubmed_tfidf[pubmed_corpus]
 pubmed_corpus_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus_tfidf'))
+print "################# STARTING LSI MODEL ###############"
 
 pubmed_lsi = models.LsiModel(pubmed_corpus_tfidf, 
                              id2word=pubmed_corpus.dictionary, 
-                             num_topics=300,
-                             chunksize=10000,
-                             distributed=is_dist_or_not())
+                             num_topics=1000,
+                             chunksize=20000,
+                             distributed=True)
+print "################# STARTING LSI TRANSFORMATION #############"
 
 pubmed_corpus_lsi = pubmed_lsi[pubmed_corpus_tfidf]
 pubmed_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_lsi'))
