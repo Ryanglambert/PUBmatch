@@ -23,7 +23,6 @@ class PubmedCorpus(object):
     def __init__(self, data_folder=DATA_PATH):
         self.data_folder = data_folder
         self.dictionary = corpora.Dictionary()
-        self.load_corpus()
         
     def __iter__(self):
         pool = multiprocessing.Pool(pool_size)        
@@ -76,6 +75,7 @@ def to_unicode_or_bust(
     return obj
               
 pubmed_corpus = PubmedCorpus()
+pubmed_corpus.load_corpus()
 
 pubmed_tfidf = models.TfidfModel(pubmed_corpus, normalize=True)
 pubmed_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_tfidf'))
