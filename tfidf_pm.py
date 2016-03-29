@@ -5,12 +5,17 @@ from gensim import corpora, models, similarities, matutils, interfaces, utils
 from nltk.corpus import stopwords
 import numpy as np
 import sys
+import multiprocessing
 
+pool_size = multiprocessing.cpu_count() - 1
 STOP_WORDS = stopwords.words('english')
-
-
 DATA_PATH = (u'./pmc_data/pmc_text_files/')
 SAVE_LOCATION = './pmc_models_serialized/'
+open_times = []
+read_times = []
+tokenize_times = []
+doc2bow_times = []
+add_docs_times = []
 
 class PubmedCorpus(object):
     def __init__(self, data_folder=DATA_PATH):
@@ -19,27 +24,34 @@ class PubmedCorpus(object):
         self.load_corpus()
         
     def __iter__(self):
-        for root, dirs, files in os.walk(self.data_folder):
-            for file_name in files:
-                file_path = os.path.join(root, file_name)
-                with open(file_path, 'rb') as f:
-                    doc = f.read()
-                    doc_token_gen = utils.tokenize(doc, 
-                                                  lowercase=True)
-                    doc_tokenized = [i for i in doc_token_gen]
-                    yield self.dictionary.doc2bow(doc_tokenized)
+        pool = multiprocessing.Pool(pool_size)        
+        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=100, maxsize=2):
+            docs = pool.imap(tokenized_from_file, file_chunk)
+            for doc_tokenized in docs:
+                yield self.dictionary.doc2bow(doc_tokenized)
+        pool.terminate()     
 
 ### TODO clean up redundancy    
+
     def load_corpus(self):
+        pool = multiprocessing.Pool(pool_size)
+        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=100 , maxsize=2):
+            results = pool.imap(tokenized_from_file, file_chunk)
+            self.dictionary.add_documents(results)
+        pool.terminate()            
+
+    def file_path_iter(self):
         for root, dirs, files in os.walk(self.data_folder):
             for file_name in files:
                 file_path = os.path.join(root, file_name)
-                with open(file_path, 'rb') as f:
-                    doc = f.read()
-                    doc_token_gen = utils.tokenize(doc, 
-                                                  lowercase=True)
-                    doc_tokenized = [i for i in doc_token_gen]
-                    self.dictionary.add_documents([doc_tokenized])
+                yield file_path
+
+def tokenized_from_file(file_path):
+    with open(file_path, 'rb') as f:
+        doc = f.read()
+        doc_token_gen = utils.tokenize(doc, lowercase=True)
+        doc_tokenized = [i for i in doc_token_gen if i not in STOP_WORDS]
+        return doc_tokenized
 
 def is_dist_or_not():
     dist_input = ''
@@ -77,5 +89,11 @@ pubmed_lsi = models.LsiModel(pubmed_corpus_tfidf,
 
 pubmed_corpus_lsi = pubmed_lsi[pubmed_corpus_tfidf]
 pubmed_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_lsi'))
+
+# print "average open_times", np.mean(open_times), "n = ", len(open_times)
+# print "average read_times", np.mean(read_times), "n = ", len(read_times)
+# print "average tokenize_times", np.mean(tokenize_times), "n = ", len(tokenize_times)
+# # print "average doc2bow_times", np.mean(doc2bow_times), "n = ", len(doc2bow_times)
+# print "average add_docs_times", np.mean(add_docs_times), "n = ", len(add_docs_times)
 
 print("######### DONE!!!! ##########")
