@@ -1,3 +1,4 @@
 pmc_data/
 pmc_models_serialized/
+pmc_models_serialized.tar.gz
 *.pkl
