@@ -18,6 +18,7 @@ class PubmedCorpus(object):
     def __init__(self, data_folder=DATA_PATH):
         self.data_folder = data_folder
         self.dictionary = corpora.Dictionary()
+        self.document_file_names = []
         
     def __iter__(self):
         pool = multiprocessing.Pool(pool_size)        
@@ -70,31 +71,31 @@ def to_unicode_or_bust(
             obj = unicode(obj, encoding)
     return obj
               
-pubmed_corpus = PubmedCorpus()
-pubmed_corpus.load_corpus()
-pubmed_corpus.dictionary.save('pubmed_corpus.dict')
+def main():
+    pubmed_corpus = PubmedCorpus()
+    pubmed_corpus.load_corpus()
+    pubmed_corpus.dictionary.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus.dict'))
+    
+    pubmed_tfidf = models.TfidfModel(pubmed_corpus, normalize=True)
+    pubmed_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_tfidf'))
+    
+    pubmed_corpus_tfidf = pubmed_tfidf[pubmed_corpus]
+    pubmed_corpus_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus_tfidf'))
 
-pubmed_tfidf = models.TfidfModel(pubmed_corpus, normalize=True)
-pubmed_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_tfidf'))
+    print "################# STARTING LSI MODEL ###############"
 
-pubmed_corpus_tfidf = pubmed_tfidf[pubmed_corpus]
-pubmed_corpus_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus_tfidf'))
-print "################# STARTING LSI MODEL ###############"
+    pubmed_lsi = models.LsiModel(pubmed_corpus_tfidf, 
+                                 id2word=pubmed_corpus.dictionary, 
+                                 num_topics=1000,
+                                 chunksize=20000,
+                                 distributed=is_dist_or_not())
 
-pubmed_lsi = models.LsiModel(pubmed_corpus_tfidf, 
-                             id2word=pubmed_corpus.dictionary, 
-                             num_topics=1000,
-                             chunksize=20000,
-                             distributed=True)
-print "################# STARTING LSI TRANSFORMATION #############"
+    print "################# STARTING LSI TRANSFORMATION #############"
 
-pubmed_corpus_lsi = pubmed_lsi[pubmed_corpus_tfidf]
-pubmed_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_lsi'))
+    pubmed_corpus_lsi = pubmed_lsi[pubmed_corpus_tfidf]
+    pubmed_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_lsi'))
 
-# print "average open_times", np.mean(open_times), "n = ", len(open_times)
-# print "average read_times", np.mean(read_times), "n = ", len(read_times)
-# print "average tokenize_times", np.mean(tokenize_times), "n = ", len(tokenize_times)
-# # print "average doc2bow_times", np.mean(doc2bow_times), "n = ", len(doc2bow_times)
-# print "average add_docs_times", np.mean(add_docs_times), "n = ", len(add_docs_times)
+    print("######### DONE!!!! ##########")
 
-print("######### DONE!!!! ##########")
+if __name__ == '__main__':
+    main()
