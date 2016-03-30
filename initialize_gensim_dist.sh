@@ -29,8 +29,6 @@ python -m gensim.models.lsi_worker &
 python -m gensim.models.lsi_worker &
 python -m gensim.models.lsi_worker &
 python -m gensim.models.lsi_worker &
-python -m gensim.models.lsi_worker &
-python -m gensim.models.lsi_worker &
 # Start gensim dispatcher (organizes jobs to send work to workers)
 # You only need to run one of these
 python -m gensim.models.lsi_dispatcher &
