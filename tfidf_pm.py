@@ -14,7 +14,7 @@ STOP_WORDS = stopwords.words('english')
 DATA_PATH = (u'./pmc_data/pmc_text_files/')
 SAVE_LOCATION = './pmc_models_serialized/'
 
-class PubmedCorpus(object):
+class PubmedCorpus(corpora.textcorpus.TextCorpus):
     def __init__(self, data_folder=DATA_PATH):
         self.data_folder = data_folder
         self.dictionary = corpora.Dictionary()
@@ -80,6 +80,7 @@ def main():
     pubmed_corpus.dictionary.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus.dict'))
     with open(os.path.join(SAVE_LOCATION, 'document_file_names'), 'w') as f:
         pickle.dump(pubmed_corpus.document_file_names, f)
+    corpora.MmCorpus.serialize('./pmc_models_serialized/pubmed_corpus.mm', pubmed_corpus)
     
     print "################ BUILDING TFIDF ###############"
     pubmed_tfidf = models.TfidfModel(pubmed_corpus, normalize=True)
@@ -100,6 +101,13 @@ def main():
 
     pubmed_corpus_lsi = pubmed_lsi[pubmed_corpus_tfidf]
     pubmed_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_lsi'))
+    pubmed_corpus_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus_lsi'))
+
+    print "################# MAKE SIMILARITY OBJECT #############"
+
+    pubmed_sim = similarities.Similarity('/tmp/sim', pubmed_corpus_lsi, pubmed_lsi.num_topics)
+    pubmed_sim.save('./pmc_models_serialized/pubmed_sim')
+
 
     print("######### DONE!!!! ##########")
 
