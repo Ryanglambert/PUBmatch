@@ -22,7 +22,7 @@ class PubmedCorpus(corpora.textcorpus.TextCorpus):
         
     def __iter__(self):
         pool = multiprocessing.Pool(pool_size)        
-        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000, maxsize=5):
+        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000, maxsize=20):
             docs = pool.imap(tokenized_from_file, file_chunk)
             for doc_tokenized in docs:
                 yield self.dictionary.doc2bow(doc_tokenized)
@@ -32,7 +32,7 @@ class PubmedCorpus(corpora.textcorpus.TextCorpus):
 
     def load_corpus(self):
         pool = multiprocessing.Pool(pool_size)
-        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000 , maxsize=5):
+        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000 , maxsize=20):
             results = pool.imap(tokenized_from_file, file_chunk)
             self.dictionary.add_documents(results, prune_at=2000000)
             self.document_file_names += [file_path for file_path in file_chunk]
@@ -105,12 +105,6 @@ def main():
 
     pubmed_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_lsi'))
     pubmed_corpus_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus_lsi'))
-
-    # print "################# MAKE SIMILARITY OBJECT #############"
-
-    # pubmed_sim = similarities.Similarity('/tmp/sim', pubmed_corpus_lsi, pubmed_lsi.num_topics)
-    # pubmed_sim.save('./pmc_models_serialized/pubmed_sim')
-
 
     print("######### DONE!!!! ##########")
 
