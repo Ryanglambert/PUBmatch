@@ -1,4 +1,7 @@
 from tfidf_pm import *
+import logging
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
 
 print "################# MAKE SIMILARITY OBJECT #############"
 
