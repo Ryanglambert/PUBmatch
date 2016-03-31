@@ -22,17 +22,22 @@ class PubmedCorpus(corpora.textcorpus.TextCorpus):
         
     def __iter__(self):
         pool = multiprocessing.Pool(pool_size)        
-        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000, maxsize=20):
+        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=200, maxsize=20):
             docs = pool.imap(tokenized_from_file, file_chunk)
             for doc_tokenized in docs:
                 yield self.dictionary.doc2bow(doc_tokenized)
         pool.terminate()     
 
+    def __len__(self):
+        if not hasattr(self, 'length'):
+            self.length = sum(1 for _ in self.__iter__())
+        return self.length
+
 ### TODO clean up redundancy    
 
     def load_corpus(self):
         pool = multiprocessing.Pool(pool_size)
-        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000 , maxsize=20):
+        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=200 , maxsize=20):
             results = pool.imap(tokenized_from_file, file_chunk)
             self.dictionary.add_documents(results, prune_at=200000)
             self.document_file_names += [file_path for file_path in file_chunk]
