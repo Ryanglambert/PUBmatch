@@ -17,7 +17,7 @@ pubmed_corpus_lsi = models.LsiModel.load('./pmc_models_serialized/pubmed_corpus_
 
 print "################ MAKING SIMILARITY MATRIX ################"
 
-pubmed_sim = similarities.MatrixSimilarity(pubmed_corpus_lsi, num_features=pubmed_lsi.num_topics)
+pubmed_sim = similarities.MatrixSimilarity(pubmed_corpus_lsi, num_features=pubmed_lsi.num_topics, chunksize=4000)
 
 pubmed_sim.save('./pmc_models_serialized/pubmed_sim')
 
