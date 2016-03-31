@@ -22,7 +22,7 @@ class PubmedCorpus(corpora.textcorpus.TextCorpus):
         
     def __iter__(self):
         pool = multiprocessing.Pool(pool_size)        
-        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=200, maxsize=20):
+        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000, maxsize=20):
             docs = pool.imap(tokenized_from_file, file_chunk)
             for doc_tokenized in docs:
                 yield self.dictionary.doc2bow(doc_tokenized)
@@ -37,7 +37,7 @@ class PubmedCorpus(corpora.textcorpus.TextCorpus):
 
     def load_corpus(self):
         pool = multiprocessing.Pool(pool_size)
-        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=200 , maxsize=20):
+        for file_chunk in utils.chunkize(self.file_path_iter(), chunksize=1000, maxsize=20):
             results = pool.imap(tokenized_from_file, file_chunk)
             self.dictionary.add_documents(results, prune_at=200000)
             self.document_file_names += [file_path for file_path in file_chunk]
@@ -82,23 +82,23 @@ def main():
     print "################ BUILDING CORPUS ###############"
 
     pubmed_corpus.load_corpus()
-    pubmed_corpus.dictionary.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus.dict'))
-    with open(os.path.join(SAVE_LOCATION, 'document_file_names'), 'w') as f:
-        pickle.dump(pubmed_corpus.document_file_names, f)
-    corpora.MmCorpus.serialize('./pmc_models_serialized/pubmed_corpus.mm', pubmed_corpus)
+    # pubmed_corpus.dictionary.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus.dict'))
+    # with open(os.path.join(SAVE_LOCATION, 'document_file_names'), 'w') as f:
+    #     pickle.dump(pubmed_corpus.document_file_names, f)
+    # corpora.MmCorpus.serialize('./pmc_models_serialized/pubmed_corpus.mm', pubmed_corpus)
     
     print "################ BUILDING TFIDF ###############"
     pubmed_tfidf = models.TfidfModel(pubmed_corpus, normalize=True)
     pubmed_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_tfidf'))
     
     pubmed_corpus_tfidf = pubmed_tfidf[pubmed_corpus]
-    pubmed_corpus_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus_tfidf'))
+    # pubmed_corpus_tfidf.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus_tfidf'))
 
     print "################# STARTING LSI MODEL ###############"
 
     pubmed_lsi = models.LsiModel(pubmed_corpus_tfidf, 
                                  id2word=pubmed_corpus.dictionary, 
-                                 num_topics=1000,
+                                 num_topics=300,
                                  chunksize=20000,
                                  distributed=is_dist_or_not())
 
@@ -110,6 +110,12 @@ def main():
 
     pubmed_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_lsi'))
     pubmed_corpus_lsi.save(os.path.join(SAVE_LOCATION, 'pubmed_corpus_lsi'))
+
+    print "################# MAKE SIMILARITY INDEX OBJECT #################"
+    pubmed_sim = similarities.MatrixSimilarity(pubmed_corpus_lsi, pubmed_lsi.num_topics)
+
+    pubmed_sim.save('./pmc_models_serialized/pubmed_sim')
+    
 
     print("######### DONE!!!! ##########")
 
