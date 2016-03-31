@@ -99,7 +99,7 @@ def main():
     pubmed_lsi = models.LsiModel(pubmed_corpus_tfidf, 
                                  id2word=pubmed_corpus.dictionary, 
                                  num_topics=300,
-                                 chunksize=20000,
+                                 chunksize=40000,
                                  distributed=is_dist_or_not())
 
     print "################# STARTING LSI TRANSFORMATION #############"
