@@ -1,9 +1,13 @@
-from tfidf_pm import *
+from gensim import corpora, models, similarities, matutils, interfaces, utils
+import multiprocessing
 import csv
 import os
 import pdb
 import fileinput
-from pprint import pprint
+from pprint import pprint 
+import sys
+
+from tfidf_pm import PubmedCorpus
 
 #### should use MatrixSimilarity
 pubmed_sim = similarities.MatrixSimilarity.load('./pmc_models_serialized/pubmed_sim')
@@ -41,12 +45,11 @@ def document_file_names_stripper(file_name):
     stripped_name = os.path.basename(os.path.slitext(file_name)[0])
     return stripped_name
 
-
 def main():
 
     while True:
         pmc_sim_nums = []
-        new_doc = raw_input('paste document: ')
+        new_doc = raw_input('input string: ')
         new_doc_sims = get_similarity_list(new_doc)
         # new_doc_sims_threshold = filter(lambda x: x[1] > .5, new_doc_sims)
         new_doc_sims_threshold = new_doc_sims
