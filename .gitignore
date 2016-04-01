@@ -1,5 +1,6 @@
 pmc_data/
 pmc_models_serialized/
+pmc_models_serialized_small/
 pmc_models_from_remote/
 pmc_models_serialized.tar.gz
 *.pyc

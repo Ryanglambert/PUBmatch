@@ -15,13 +15,6 @@ def my_form_post():
     processed_text = text.upper()
     return processed_text
 
-
-@app.route('/hello/') # when the route contains "/hello/"
-@app.route('/hello/<name>') # when the route contains "<name>"
-def hello(name=None):
-    return render_template('hello.html', name=name) # render_template (use template passes name)
-
-
 if __name__ == "__main__":
     # app.run()
     app.run(debug=True)  ### With debug=True the server will automatically update when you write to this file
