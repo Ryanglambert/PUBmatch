@@ -1,15 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
-<body>
-    <h1>Enter your text</h1>
-    <h2>I will return a list of pubmed links</h2>
-    <form action="." method="POST">
-        <input type="text" name="article_input" style="width:400px;height:400px">
-            <!-- <textarea style="width:400px;height:400px"> -->
-            <!-- </textarea> -->
+<head>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/offcanvas.css" rel="stylesheet">
+    <link rel="icon" href="../static/PUBmatch-icon-trans.ico">
+</head>
 
-        <input type="submit" name="my-form" value="Send">
+<html lang="en">
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">PUBmatch</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="#about">About</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div><!--/.nav-collapse -->
+    </div>
+  </nav>
+
+
+
+<body>
+    <div class="jumbotron" style='float: left: width: 50%;' align="middle">
+        <img src='./../static/PUBmatch-logo-transparent.png' style="max-width:70%" align="middle">
+    </div>
+    <div class="container" align="middle">
+    <h1 class="text-primary">Find Conceptually Related Research Articles</h1>
+    <form action="." method="POST">
+        <div class="form-group">
+            <textarea class="form-control" name="article_input_2" rows="20" id="comment" style="max-width:80%;"></textarea>
+            <p></p>
+            <button class="btn btn-primary" type="submit" name="my-form_2" value="FIND ARTICLES" style="padding: 5px 10px; background: #4285F4;" >
+                Find Articles
+            </button>
+        </div>
     </form>
+    </div>
 </body>
 </html>
 

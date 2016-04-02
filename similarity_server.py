@@ -9,6 +9,7 @@ import logging
 import sys
 
 from tfidf_pm import PubmedCorpus
+
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 TITLE_DICT = {}
@@ -22,7 +23,8 @@ with open('./pmc_data/file_list.txt', 'rb') as csv_f:
         file_name = os.path.basename(os.path.splitext(os.path.splitext(row[0])[0])[0])
         pmc_num = row[3].replace('PMID:', '')
         pmid = row[2]
-        TITLE_DICT[file_name] = pmc_num, pmid
+        pm_title = row[0]
+        TITLE_DICT[file_name] = pmc_num, pmid, pm_title
 
 def get_similarity_list(new_doc):
     new_doc = utils.tokenize(new_doc)
@@ -63,6 +65,8 @@ pubmed_corpus_lsi = models.LsiModel.load(os.path.join(MODEL_FOLDER, 'pubmed_corp
 DOCUMENT_FILE_NAMES = pubmed_corpus_lsi.corpus.corpus.document_file_names
 DOCUMENT_FILE_NAMES = map(lambda x: os.path.basename(os.path.splitext(x)[0]), DOCUMENT_FILE_NAMES)
 
+###### Flask Starts Here ######
+
 from flask import Flask, url_for, request, render_template
 app = Flask(__name__)
 
@@ -72,28 +76,15 @@ def my_form():
 
 @app.route('/', methods=['POST'])
 def my_form_post():
-    new_doc = request.form['article_input']
+    new_doc = request.form['article_input_2']
     new_doc_sims = get_similarity_list(new_doc)
     pmc_sim_nums = map(get_pmc_number, new_doc_sims)
     pmc_doc_sims = zip(pmc_sim_nums, new_doc_sims)
-    # pmc_doc_sims = new_doc.split()
-    # pubmed_sim_nums = pmc_doc_sims
     
     return render_template('pubmed_list.html', pmids=pmc_doc_sims)
 
-# def main():
-    # while True:
-        # pmc_sim_nums = []
-        # new_doc = raw_input('input string: ')
-        # new_doc_sims = get_similarity_list(new_doc)
-        # new_doc_sims_threshold = filter(lambda x: x[1] > .5, new_doc_sims)
-        # new_doc_sims_threshold = new_doc_sims
-        # pmc_sim_nums = map(get_pmc_number, new_doc_sims_threshold)
-        # pmc_doc_sims = zip(pmc_sim_nums, new_doc_sims_threshold)
-        # pprint(pmc_doc_sims)
-
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
 
 
 
