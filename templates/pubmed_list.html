@@ -35,22 +35,24 @@
 
 <title>{% block title %}{% endblock %}</title>
 <ul>
-    <div style='float: left; width: 40%;'>
+    <div style='float: left; width: 75%;'>
     <h3> PubMed Links </h3>
     </div>
 </ul>
 <ul>
-    <div style='float: left; width: 50%;'>
+    <div style='float: left; width: 25%;'>
     <h3> Cosine Similarity Score </h3>
     </div>
 </ul>
 <ul>
 {% for pmid in pmids %}
-<div style='float: left; width: 50%;'
-    <li><a href="{{ pmid[0] }}" class="text-primary" target="_blank">{{ pmid[0] }}</a></li>
+<div style='float: left; width: 75%;'
+    <li><a href="{{ pmid[0][0] }}" class="text-primary" target="_blank">{{ pmid[0][1] |truncate(100) }}</a></li>
+    <br>
 </div>
-<div style='float: left; width: 40%;'
+<div style='float: left; width: 25%;'
     <li><a href="{{ pmid[0] }}" class="text-primary" target="_blank">{{ pmid[1][1] }}</a></li>
+    <br>
 </div>
 <!-- <div style='float: left; width: 30%;' -->
 <!--     <li><a href="{{ pmid[0] }}" class="text-primary">{{ pmid[1][2] }}</a></li> -->
