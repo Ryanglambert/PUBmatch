@@ -88,8 +88,8 @@ def document_file_names_stripper(file_name):
     stripped_name = os.path.basename(os.path.slitext(file_name)[0])
     return stripped_name
 
-MODEL_FOLDER = './pmc_models_from_remote/pmc_models_serialized_300f_pruneat200000'
-# MODEL_FOLDER = './pmc_models_serialized_small/'
+# MODEL_FOLDER = './pmc_models_from_remote/pmc_models_serialized_300f_pruneat200000'
+MODEL_FOLDER = './pmc_models_serialized/'
 
 pubmed_sim = similarities.MatrixSimilarity.load(os.path.join(MODEL_FOLDER, 'pubmed_sim'))
 pubmed_sim.num_best = 20
@@ -119,10 +119,11 @@ def my_form_post():
     
     return render_template('pubmed_list.html', pmids=pmc_doc_sims)
 
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
 if __name__ == '__main__':
-    app.run(debug=True)
-
-
+    app.run(host='0.0.0.0', port=80)
 
 
 
