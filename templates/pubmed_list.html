@@ -46,15 +46,15 @@
 </ul>
 <ul>
 {% for pmid in pmids %}
-<div style='float: left; width: 40%;'
+<div style='float: left; width: 50%;'
     <li><a href="{{ pmid[0] }}" class="text-primary">{{ pmid[0] }}</a></li>
 </div>
-<div style='float: left; width: 30%;'
+<div style='float: left; width: 40%;'
     <li><a href="{{ pmid[0] }}" class="text-primary">{{ pmid[1][1] }}</a></li>
 </div>
-<div style='float: left; width: 30%;'
-    <li><a href="{{ pmid[0] }}" class="text-primary">{{ pmid[1][2] }}</a></li>
-</div>
+<!-- <div style='float: left; width: 30%;' -->
+<!--     <li><a href="{{ pmid[0] }}" class="text-primary">{{ pmid[1][2] }}</a></li> -->
+<!-- </div> -->
 {% endfor %}
 </ul>
     
