@@ -1,0 +1,53 @@
+# Update everything
+sudo apt-get update
+​
+# Install python and pip, python-dev for building C extensions to Python (NECESSARY!)
+sudo apt-get install python-pip python-dev
+​
+# Install Atlas (for fast matrix manipulations, a better BLAS library) and a fortran compiler (needed for Numpy install)
+sudo apt-get install libatlas-base-dev gfortran
+​
+# Make sure that Atlas is our default library for BLAS
+# For each of these, choose option 1 (should be atlas) and press enter
+# Explanation: libblas is the library that numpy looks for.  When you do sudo update-alternatives you link that library to the selection of your choice (atlas)
+sudo update-alternatives --config libblas.so # Choose option 1
+sudo update-alternatives --config libblas.so.3 # Choose option 1
+​
+# You need to do the same for LAPACK, but Atlas should be the only option so it should say you have no choice
+sudo update-alternatives --config liblapack.so
+sudo update-alternatives --config liblapack.so.3
+​
+# Install ipython if you want
+sudo pip install ipython
+​
+# Install numpy and scipy (MUST USE PIP TO PICK UP ATLAS!!!)
+sudo pip install numpy
+sudo pip install scipy
+​
+# Run this command to make sure your numpy configuration is correct, if it is, you should see the atlas libraries having entries in the printed results
+python -c 'import numpy; numpy.show_config()'
+​
+# Install gensim in distributed mode (for parallel processing)
+sudo pip install gensim[distributed]
+​
+# Set up Pyro which gensim uses for talking between processes (possibly on remote machines).  Gensim distributed installed Pyro, we just have to configure it.
+export PYRO_SERIALIZERS_ACCEPTED=pickle
+export PYRO_SERIALIZER=pickle
+python -m Pyro4.naming -n 0.0.0.0 & #Start the Pyro namenode
+​
+# Start gensim workers, run this once for each core that you want to distribute over
+# Probably at least leave one core out
+python -m gensim.models.lsi_worker &
+python -m gensim.models.lsi_worker &
+python -m gensim.models.lsi_worker &
+python -m gensim.models.lsi_worker &
+python -m gensim.models.lsi_worker &
+python -m gensim.models.lsi_worker &
+python -m gensim.models.lsi_worker &
+​
+# Start gensim dispatcher (organizes jobs to send work to workers)
+# You only need to run one of these
+python -m gensim.models.lsi_dispatcher &
+​
+# Start ipython and run something like in lsi.py to build truly massive LSI indexes!
+ipython
