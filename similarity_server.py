@@ -89,7 +89,7 @@ def document_file_names_stripper(file_name):
     return stripped_name
 
 # MODEL_FOLDER = './pmc_models_from_remote/pmc_models_serialized_300f_pruneat200000'
-MODEL_FOLDER = './pmc_models_serialized/'
+MODEL_FOLDER = './pmc_models_serialized_small/'
 
 pubmed_sim = similarities.MatrixSimilarity.load(os.path.join(MODEL_FOLDER, 'pubmed_sim'))
 pubmed_sim.num_best = 20
