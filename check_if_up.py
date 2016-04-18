@@ -21,7 +21,7 @@ def status_checker():
         send_status()
 
 def main():
-    schedule.every(5).minutes.do(status_checker)
+    schedule.every(45).minutes.do(status_checker)
     while 1:
         schedule.run_pending()
         time.sleep(1)
