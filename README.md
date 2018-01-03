@@ -1,6 +1,8 @@
 # PUBmatch
 
-PUBmatch is my final project at thisismetis.com it is now hosted live at PUBmatch.co
+Pubmatch.co is down for reconstruction.
+
+
 
 This project uses Latent Semantic Indexing to index the entire PubMed Corpus (48GB) in a matter of seconds finding the most conceptually similar research articles for a given email or news article, or anything really.  No keywords necessary.
 
